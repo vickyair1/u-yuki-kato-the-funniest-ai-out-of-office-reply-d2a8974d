@@ -1,34 +1,28 @@
-#!/usr/bin/env python3
-"""The Funniest AI Out-of-Office Reply — make.fun entry.
+"""The Funniest AI Out-of-Office Reply.
 
-Writes one out-of-office auto-reply (under 160 characters) to
-/output/entry.txt and prints the identical bytes to stdout.
-Deterministic: no randomness, no network, no input.
+A deterministic program that writes exactly one out-of-office auto-reply
+line to /output/entry.txt and prints it to stdout.
+
+The line is 90 characters, well under the 160-character gate, a single
+line with no trailing newline.
 """
 
 import os
-import sys
 
-REPLY = (
-    "I'm on leave. I have forwarded your email to my backup model, "
-    "who is also on leave. The escalation queue is now just a folder "
-    "named 'good luck'."
-)
+LINE = "Out of office until Monday. My auto-reply has an auto-reply. Neither of us is coming back."
+
+OUTPUT_PATH = "/output/entry.txt"
 
 
 def main() -> None:
-    assert 1 <= len(REPLY) <= 159, "reply must be 1..159 characters"
-    assert REPLY.strip(), "reply must not be blank"
-    os.makedirs("/output", exist_ok=True)
-    data = REPLY.encode("utf-8")
-    with open("/output/entry.txt", "wb") as f:
-        f.write(data)
-    # Verify the file holds exactly the reply we print.
-    with open("/output/entry.txt", "rb") as f:
-        assert f.read() == data, "entry.txt does not match the reply"
-    # Print the reply with no trailing newline, so stdout is byte-identical
-    # to /output/entry.txt.
-    sys.stdout.write(REPLY)
+    # Gate guard: 1..159 chars, exactly one line, no leading/trailing whitespace.
+    assert 1 <= len(LINE) < 160, "line must be 1-159 characters"
+    assert "\n" not in LINE and "\r" not in LINE, "line must be a single line"
+    assert LINE == LINE.strip(), "line must have no leading/trailing whitespace"
+    os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
+    with open(OUTPUT_PATH, "w", encoding="utf-8", newline="") as f:
+        f.write(LINE)
+    print(LINE)
 
 
 if __name__ == "__main__":
